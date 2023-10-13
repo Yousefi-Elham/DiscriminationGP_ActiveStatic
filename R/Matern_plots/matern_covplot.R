@@ -1,14 +1,10 @@
-rm(list=ls())
-#-----------------------------------------------------------
+library(mvtnorm)
+
+#plot of the Matern covariance kernels for different values of nu
 lenth.g <- 6
-lenth.g
-
-grid <- seq(0,lenth.g,length.out = 501)
-N <- length(grid)
-sigma2=1
-
 D <- seq(0,lenth.g,length.out = 501)
-
+N <- length(D)
+sigma2=1
 rho1 <- 1
 
 
@@ -29,13 +25,12 @@ legend(4.2,0.8,legend=c(expression(paste(nu, "=", "1/2")),expression(paste(nu, "
 
 
 ##----------------------------------------------------------------------------------------------
+# plot of one realization of the above covariance kernels
 gridp <- seq(0,10,length.out = 501)
 THETA.FIX <- c(1, 1.07)
 sigma2.ini=1
 
 
-
-#generate.y.kernels <- function(theta,sigma2,des,model){
 theta <- THETA.FIX[1]
 sigma2 <- sigma2.ini
 des <- gridp
