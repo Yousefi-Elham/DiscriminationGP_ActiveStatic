@@ -1,1 +1,0 @@
-when we use the other algorithm which give unequal weight the violating points increase. result: equal points is better at lease for the three point design

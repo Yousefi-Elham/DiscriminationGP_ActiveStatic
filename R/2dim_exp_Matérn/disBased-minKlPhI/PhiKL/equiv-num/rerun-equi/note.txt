@@ -1,1 +1,1 @@
-I have rerunned the KL (without set.seed). The result is that the cluster could be on each of the axes.
+We have rerunned the KL (without set.seed). The result is that the cluster could be on each of the axes.

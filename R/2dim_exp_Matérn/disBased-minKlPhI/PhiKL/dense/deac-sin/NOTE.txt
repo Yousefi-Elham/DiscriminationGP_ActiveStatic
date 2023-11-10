@@ -1,1 +1,0 @@
-Crit values are the indication that the design are not optimal but the program is not stopped while deactivating singularity conditions.

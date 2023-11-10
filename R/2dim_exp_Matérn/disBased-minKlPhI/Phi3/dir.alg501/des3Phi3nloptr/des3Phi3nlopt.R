@@ -97,6 +97,10 @@ opts <- list( "algorithm" = "NLOPT_LD_SLSQP",
               "xtol_rel" = 1.0e-7,
               "maxeval" = 1000 )
 #-------------------------------------------------------------------------------------
+# when we use the other algorithm which give unequal weight
+#the violating points increase. result: equal points is better
+# at lease for the three point design
+
 res <- nloptr( x0=des3Phi3,eval_f=Phi.optim0 ,eval_grad_f=eval_grad_f0,lb = rep(0,9),
                ub=c(rep(10,6),rep(1,3)), eval_g_eq =eval_g_eq0 , opts=opts)
 

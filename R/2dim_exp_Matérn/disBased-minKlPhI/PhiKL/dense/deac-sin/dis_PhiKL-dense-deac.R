@@ -329,6 +329,9 @@ system.time({
 })
 
 #-----------------------------------------------------------------------------------------------
+# Crit. values are the indication that the design are not optimal but the program is not
+# stopped while deactivating singularity conditions.
+
 as.numeric(row.names(xstart))
 setdiff(1:N,as.numeric(row.names(xstart)))
 s.all <- sort(c(as.numeric(row.names(xstart)),setdiff(1:N,as.numeric(row.names(xstart)))))
