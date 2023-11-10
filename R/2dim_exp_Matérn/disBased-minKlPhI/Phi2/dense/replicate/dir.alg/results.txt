@@ -1,0 +1,92 @@
+
+> nrow(xstart)
+[1] 1003
+> design1.uniq <- uniquecombs(xstart)
+> counter1 <- attr(design1.uniq,"index")
+> counter2 <- unique(sort(counter1))
+> opt.weight <- numeric(nrow(design1.uniq))
+> for(z in 1:length(counter2)){
++   
++   x.replic <- which(counter1==counter2[z])
++   opt.weight[z] <- sum(design[x.replic,3])
++   
++ }
+> design.opt <- cbind(design1.uniq,opt.weight)
+> design.opt
+                 opt.weight
+      10.0 0.0 0.0323010323
+       9.2 2.0 0.0003330003
+       8.0 0.8 0.1002331002
+x.hat  9.6 1.8 0.0009990010
+x.hat  8.2 0.4 0.1068931069
+x.hat  9.4 2.2 0.1048951049
+x.hat 10.0 0.4 0.1378621379
+x.hat  9.6 0.0 0.0059940060
+x.hat  7.8 0.4 0.0989010989
+x.hat  9.2 1.8 0.0029970030
+x.hat  9.0 2.2 0.0279720280
+x.hat  7.8 0.8 0.0379620380
+x.hat  9.6 0.2 0.0459540460
+x.hat  8.0 0.4 0.0009990010
+x.hat  9.0 2.0 0.1108891109
+x.hat  9.6 2.0 0.0089910090
+x.hat  9.4 1.8 0.0849150849
+x.hat  9.8 0.0 0.0909090909
+> nrow(design.opt)
+[1] 18
+> sum(design.opt[,3])
+[1] 1
+> mm=which(design.opt[,3]>0.001)
+> mm
+            x.hat x.hat x.hat x.hat x.hat x.hat x.hat x.hat x.hat x.hat x.hat x.hat x.hat 
+    1     3     5     6     7     8     9    10    11    12    13    15    16    17    18 
+> design.opt[mm,]
+                opt.weight
+      10.0 0.0 0.032301032
+       8.0 0.8 0.100233100
+x.hat  8.2 0.4 0.106893107
+x.hat  9.4 2.2 0.104895105
+x.hat 10.0 0.4 0.137862138
+x.hat  9.6 0.0 0.005994006
+x.hat  7.8 0.4 0.098901099
+x.hat  9.2 1.8 0.002997003
+x.hat  9.0 2.2 0.027972028
+x.hat  7.8 0.8 0.037962038
+x.hat  9.6 0.2 0.045954046
+x.hat  9.0 2.0 0.110889111
+x.hat  9.6 2.0 0.008991009
+x.hat  9.4 1.8 0.084915085
+x.hat  9.8 0.0 0.090909091
+> nrow(design.opt[mm,])
+[1] 15
+> Phi.crit1 <- dir.deriv(est.theta,sigma2.ini,design.opt[,c(1,2)],design.opt[,3])
+> Phi.opt1 <-  Phi.optim(est.theta,sigma2.ini,design.opt[,c(1,2)],design.opt[,3]) #equal to CRIT.vec[max.iter] 
+> Phi.opt1
+[1] 0.0005824479
+> Phi.check <- numeric(N)
+> for(i in 1:N){
++   if(Phi.crit1[i] <= Phi.opt1){
++     Phi.check[i] <- 1
++   }else{
++     Phi.check[i] <- 0
++   }
++   
++ }
+> length(which(Phi.check==0))
+[1] 10
+> length(which(Phi.check==0))/N
+[1] 0.003844675
+> poi <- grid[!Phi.check, ]
+> poi
+    Var1 Var2
+50   9.8  0.0
+51  10.0  0.0
+100  9.6  0.2
+142  7.8  0.4
+153 10.0  0.4
+244  7.8  0.8
+245  8.0  0.8
+507  9.4  1.8
+607  9.0  2.2
+609  9.4  2.2
+> 

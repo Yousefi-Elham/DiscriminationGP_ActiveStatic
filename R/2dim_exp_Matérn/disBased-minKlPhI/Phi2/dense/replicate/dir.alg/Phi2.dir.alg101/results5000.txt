@@ -1,0 +1,91 @@
+nrow(xstart)
+[1] 5003
+> design1.uniq <- uniquecombs(xstart)
+> counter1 <- attr(design1.uniq,"index")
+> counter2 <- unique(sort(counter1))
+> opt.weight <- numeric(nrow(design1.uniq))
+> for(z in 1:length(counter2)){
++   
++   x.replic <- which(counter1==counter2[z])
++   opt.weight[z] <- sum(design[x.replic,3])
++   
++ }
+> design.opt <- cbind(design1.uniq,opt.weight)
+> design.opt
+                 opt.weight
+      10.0 0.0 2.666133e-04
+       9.2 2.0 2.666133e-04
+       8.0 0.8 6.665334e-05
+x.hat  8.1 0.3 1.411718e-01
+x.hat 10.0 0.5 1.351730e-01
+x.hat  8.8 2.1 1.221756e-01
+x.hat  7.7 0.5 1.999600e-04
+x.hat  9.7 0.2 1.177764e-01
+x.hat  8.0 0.7 7.998400e-04
+x.hat  9.1 2.4 1.999600e-04
+x.hat  9.3 2.0 1.231754e-01
+x.hat  7.8 0.7 3.999200e-04
+x.hat 10.0 0.1 6.278744e-02
+x.hat  7.7 0.4 6.518696e-02
+x.hat  9.0 1.8 4.699060e-02
+x.hat  9.2 2.3 3.999200e-04
+x.hat  7.9 0.7 1.257748e-01
+x.hat  9.1 2.3 5.718856e-02
+> nrow(design.opt)
+[1] 18
+> sum(design.opt[,3])
+[1] 1
+> #--------------------------------#--------------------------------#--------------------------------
+> design.opt[,c(1,2)]
+              
+      10.0 0.0
+       9.2 2.0
+       8.0 0.8
+x.hat  8.1 0.3
+x.hat 10.0 0.5
+x.hat  8.8 2.1
+x.hat  7.7 0.5
+x.hat  9.7 0.2
+x.hat  8.0 0.7
+x.hat  9.1 2.4
+x.hat  9.3 2.0
+x.hat  7.8 0.7
+x.hat 10.0 0.1
+x.hat  7.7 0.4
+x.hat  9.0 1.8
+x.hat  9.2 2.3
+x.hat  7.9 0.7
+x.hat  9.1 2.3
+> design.opt[,3]
+                                              x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat 
+2.666133e-04 2.666133e-04 6.665334e-05 1.411718e-01 1.351730e-01 1.221756e-01 1.999600e-04 1.177764e-01 7.998400e-04 1.999600e-04 1.231754e-01 
+       x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat 
+3.999200e-04 6.278744e-02 6.518696e-02 4.699060e-02 3.999200e-04 1.257748e-01 5.718856e-02 
+> Phi.crit1 <- dir.deriv(est.theta,sigma2.ini,design.opt[,c(1,2)],design.opt[,3])
+> Phi.opt1 <-  Phi.optim(est.theta,sigma2.ini,design.opt[,c(1,2)],design.opt[,3]) #equal to CRIT.vec[max.iter] 
+> Phi.opt1
+[1] 0.0005847593
+> Phi.check <- numeric(N)
+> for(i in 1:N){
++   if(Phi.crit1[i] <= Phi.opt1){
++     Phi.check[i] <- 1
++   }else{
++     Phi.check[i] <- 0
++   }
++   
++ }
+> length(which(Phi.check==0))
+[1] 6
+> length(which(Phi.check==0))
+[1] 6
+> length(which(Phi.check==0))/N
+[1] 0.0005881776
+> poi <- grid[!Phi.check, ]
+> poi
+     Var1 Var2
+385   8.1  0.3
+482   7.7  0.4
+787   7.9  0.7
+1909  9.0  1.8
+2114  9.3  2.0
+2415  9.1  2.3

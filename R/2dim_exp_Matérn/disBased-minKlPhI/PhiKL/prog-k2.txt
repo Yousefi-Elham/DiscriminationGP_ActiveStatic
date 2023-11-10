@@ -1,0 +1,381 @@
+#Distance based
+
+library(plgp)
+library(mvtnorm)
+library(MASS)
+library(numDeriv)
+library(plotfunctions)
+rm(list=ls())
+par(mfrow=c(1,1))
+
+####################################################################################
+#---------------------------------generate the obs from under each kernel--------------------------
+sigma2.ini=1
+theta1=1
+theta2=1.07 ##NEW par
+est.theta <- c(theta1,theta2)
+#---------------------------------------------------------------------------------------------
+NRUN <- 100
+grid <- seq(0,10,length.out = 501)
+nexc <- 200
+
+#actin <- 51
+actin <- c(1,251,501)
+grid[actin]
+
+indd <- 0
+
+XMAT <- matrix(0,nexc,ncol=nexc)
+#AD.PN <- DR.PN <- c()
+#epsilon <- 0.03
+
+n1 <- length(actin)
+xstart <- grid[actin]
+xcan <- grid[-actin]
+nleft <- nexc-n1
+
+M.COUNT <- matrix(0,nleft,NRUN)
+dim(M.COUNT)
+#--------------------------------------------------------------------------------------
+generate.y.kernels <- function(theta,sigma2,des,model){
+  
+  n <- length(des)
+  DisM <- matrix(0,n,n)
+  for(i in 1:n){
+    for(j in 1:n){
+      DisM[i,j] <- abs(des[i]-des[j]) 
+    }
+  }
+  
+  kernel1 <- sigma2*(1 + sqrt(3)*DisM*theta[1]) * exp(-sqrt(3)*DisM*theta[1])
+  kernel2 <- sigma2*(1 + sqrt(5)*DisM*theta[2] + 5*DisM^2*theta[2]^2/3 ) * exp(-sqrt(5)*DisM*theta[2])
+  
+  if(model==0) y <- rmvnorm(1,sigma=kernel1)
+  if(model==1) y <- rmvnorm(1,sigma=kernel2)
+  
+  return(list(y=y,DisM=DisM,kernel1=kernel1,kernel2=kernel2))
+}
+
+#--------------------------------------------------------------------------------------
+max.likelihood.fun <- function(theta,sigma2,des,y){
+  
+  
+  theta1=theta[1]
+  theta2=theta[2]
+  
+  
+  n <- length(des)
+  DisM <- matrix(0,n,n)
+  for(i in 1:n){
+    for(j in 1:n){
+      DisM[i,j] <- abs(des[i]-des[j]) 
+    }
+  }
+  
+  kernel1 <- sigma2*(1 + sqrt(3)*DisM*theta1) * exp(-sqrt(3)*DisM*theta1)
+  log.lik1 <- -n/2*log(2*pi) - 1/2*log(det(kernel1)) - 1/2*y%*%solve(kernel1)%*%t(y)
+  
+  kernel2 <- sigma2*(1 + sqrt(5)*DisM*theta2 + 5*DisM^2*theta2^2/3 ) * exp(-sqrt(5)*DisM*theta2)
+  log.lik2 <- -n/2*log(2*pi) - 1/2*log(det(kernel2)) - 1/2*y%*%solve(kernel2)%*%t(y)
+  
+  
+  if(abs(log.lik1 - log.lik2) < 1e-6){
+    lik.res <- sample(c(0, 1), 1)
+  }else{
+    lik.res <- as.numeric(log.lik2 > log.lik1)
+  }
+  
+  # lik.res is  0 or 1 (prediction for which model is the TRUE model)
+  return(lik.res)
+}
+#--------------------------------------------------------------------------------------
+CRIT.vec <- numeric(nexc)
+
+crit.fun <- function(theta,sigma2,des){
+  
+  n <- length(des)
+  
+  if(n==1){
+    Phi.KL <- 0 
+  }else{
+    
+    DisM <- matrix(0,n,n)
+    for(i in 1:n){
+      for(j in 1:n){
+        DisM[i,j] <- abs(des[i]-des[j]) 
+      }
+    }
+    
+    
+    kernel1 <- sigma2*(1 + sqrt(3)*DisM*theta[1]) * exp(-sqrt(3)*DisM*theta[1])
+    kernel2 <- sigma2*(1 + sqrt(5)*DisM*theta[2] + 5*DisM^2*theta[2]^2/3 ) * exp(-sqrt(5)*DisM*theta[2])
+    
+    if(det(kernel1)<=0 | det(kernel2)<=0){
+      Phi.KL <- 0
+    }else{
+      Phi.KL <- 1/2*( sum(diag(solve(kernel1) %*% kernel2)) + sum(diag(solve(kernel2) %*% kernel1)) ) - n 
+    }
+    
+    
+    
+  }
+  
+  return(Phi.KL)
+  
+}
+#-------------------------------------------------------------------------------------------------
+
+CRIT.vec[1:n1] <- crit.fun(est.theta,sigma2.ini,xstart)
+#----------------------cunstructing the rest (of design) up to the required size-------------------
+set.seed(123456789)
+for( k in 1: nleft){
+  
+  print(k)
+  
+  nc <- length(xstart)
+  Ncan <- length(xcan)
+  
+  
+  ad.crit <- numeric(Ncan)
+  for(m in 1: Ncan){
+    test.des <- c(xstart,xcan[m])
+    ad.crit[m] <- crit.fun(est.theta,sigma2.ini,test.des)
+  }
+  
+  if(max(ad.crit)==0){
+    print(k-1)
+    stop("best design chosen has a zero crit. value")
+  }
+  
+  ad.ind <- which.max(ad.crit)
+  ad.point <- xcan[ad.ind]
+  xhat <- ad.point
+  xstart <- c(xstart,ad.point)
+  xcan <- xcan[-ad.ind]
+  #xcan <- sample(xcan)
+  #CRIT.vec[k+n1] <- max(ad.crit)
+  
+  #-----------------------------------------------------------------------------------------------
+  
+  CRIT.val <- crit.fun(est.theta,sigma2.ini,xstart)
+  
+  
+  exnum <- 0
+  finish.all <- FALSE
+  
+  while(!finish.all){
+    
+    nc1 <- length(xstart)
+    dr.crit <- numeric(nc1)
+    for(a in 1: nc1){
+      dr.crit[a] <- crit.fun(est.theta,sigma2.ini,xstart[-a])
+    }
+    dr.ind <- which.max(dr.crit)
+    dr.point <- xstart[dr.ind]
+    xcan <- c(xcan, dr.point)
+    xstart.dr <- xstart[-dr.ind]
+    
+    
+    
+    Ncan1 <- length(xcan)
+    add.crit <- numeric(Ncan1)
+    for(b in 1: Ncan1){
+      test.des <- c(xstart.dr,xcan[b])
+      add.crit[b] <- crit.fun(est.theta,sigma2.ini,test.des)
+    }
+    add.ind <- which.max(add.crit)
+    add.point <- xcan[add.ind]
+    xstart.ad <- c(xstart.dr,add.point)
+    xcan <- xcan[-add.ind]
+    
+    CRIT.exc <- crit.fun(est.theta,sigma2.ini,xstart.ad)
+    
+    
+    if( CRIT.exc > CRIT.val & dr.point!=add.point ){
+      #if(round(CRIT.exc,1) > round(CRIT.val,1)){
+      xstart <- xstart.ad
+      exnum <- exnum+1
+      CRIT.val <- CRIT.exc 
+      print(c(dr.point,add.point))
+    }else{
+      finish.all <- TRUE
+      xcan <- setdiff(grid,xstart)
+    }
+    
+  }
+  
+  CRIT.vec[k+n1] <- crit.fun(est.theta,sigma2.ini,xstart)
+  
+  for(NN in 1:NRUN){
+    y.obs.K <- generate.y.kernels(est.theta,sigma2.ini,xstart,1)$y #true pars so fix, only model changes
+    M.COUNT[k,NN] <- max.likelihood.fun(est.theta,sigma2.ini,xstart,y.obs.K) 
+  }
+  
+  
+  
+}
+
+#-----------------------------------------------------------------------------------------------
+
+length(xstart)
+length(xstart)-n1 
+nleft
+M.COUNT <- M.COUNT[1:(length(xstart)-n1),]
+
+dim(M.COUNT)
+M.COUNT[,1:15]
+M.COUNT[,16:30]
+M.COUNT[,31:45]
+M.COUNT[,46:60]
+M.COUNT[,61:75]
+M.COUNT[,76:90]
+M.COUNT[,91:100]
+M.COUNT[length(xstart)-n1,]
+
+
+
+av.hit.iter <- apply(M.COUNT,1,mean)
+av.hit.run <- apply(M.COUNT,2,mean)
+
+av.hit.iter
+av.hit.run
+
+dim(M.COUNT)
+nrow(M.COUNT)
+length(av.hit.iter)
+int.hit.n <- c(1,2,3,4,5,7,17,27,37,47,length(av.hit.iter))
+av.hit.iter[int.hit.n]
+###------------------------------------------
+length(CRIT.vec)
+CRIT.vec <- CRIT.vec[1:length(xstart)]
+length(CRIT.vec)
+CRIT.vec
+
+all.equal(CRIT.vec,sort(CRIT.vec))
+
+xstart
+min(xstart)
+max(xstart)
+#####################################################################################################
+#####################################################################################################
+
+jpeg("C:/UNI FILES/3files/2021/4-April/Matern1.5-2.5-newpar/Z-lucs-parametrization/distance-based/ZNpars.minKLPHI2/PhiKL/with-exchange-ultimate/threshold/length10-grid/path.jpeg")
+
+plot(seq(1:length(xstart)),seq(0,10,length=length(xstart)) ,axes = F, type = "n",xlab="iter",ylab="Incremental design",
+     main = bquote( paste( "size:", .(length(xstart)),", ","start:", .(paste(grid[actin], collapse=", ")),", ", theta, ":", 
+                           .(paste(round(est.theta,digits = 4), collapse=", ")) ) ),cex.main=2, cex.lab=1.5, cex.axis=1.5,pch=2,col="blue");
+
+xtick=c(seq(1,length(xstart),by = 10),length(xstart))
+ytick=seq(0,10,by=1)
+axis(1,at=xtick,labels=T,cex.axis=1.5)
+axis(2,at=ytick,labels=T,cex.axis=1.5)
+box()
+
+points(1:length(xstart), xstart ,col="blue", pch=16,cex=1)
+lines(seq(1:length(xstart)),xstart ,col="gray", pch=16,cex=1)
+
+dev.off()
+#-------------------------------------------------
+setEPS()
+postscript("C:/UNI FILES/3files/2021/4-April/Matern1.5-2.5-newpar/Z-lucs-parametrization/distance-based/ZNpars.minKLPHI2/PhiKL/with-exchange-ultimate/threshold/length10-grid/path.eps")
+
+plot(seq(1:length(xstart)),seq(0,10,length=length(xstart)) ,axes = F, type = "n",xlab="iter",ylab="Incremental design",
+     main = bquote( paste( "size:", .(length(xstart)),", ","start:", .(paste(grid[actin], collapse=", ")),", ", theta, ":", 
+                           .(paste(round(est.theta,digits = 4), collapse=", ")) ) ),cex.main=2, cex.lab=1.5, cex.axis=1.5,pch=2,col="blue");
+
+xtick=c(seq(1,length(xstart),by = 10),length(xstart))
+ytick=seq(0,10,by=1)
+axis(1,at=xtick,labels=T,cex.axis=1.5)
+axis(2,at=ytick,labels=T,cex.axis=1.5)
+box()
+
+points(1:length(xstart), xstart ,col="blue", pch=16,cex=1)
+lines(seq(1:length(xstart)),xstart ,col="gray", pch=16,cex=1)
+
+dev.off()
+#-------------------------------------plotting final points--------------------------
+max(CRIT.vec)
+jpeg("C:/UNI FILES/3files/2021/4-April/Matern1.5-2.5-newpar/Z-lucs-parametrization/distance-based/ZNpars.minKLPHI2/PhiKL/with-exchange-ultimate/threshold/length10-grid/criterionval.jpeg")
+
+plot(seq(1:length(xstart)),seq(0,max(CRIT.vec),length=length(xstart)),axes = F, type = "n",xlab="Iter",ylab="Criterion value",
+     main = bquote( paste("Criterion values for optimum designs",", ", sigma^2, ":",.(sigma2.ini)) ),
+     cex.main=2, cex.lab=1.5, cex.axis=1.5,pch=2,col="blue");
+
+xtick=c(seq(1,length(xstart),by = 10),length(xstart))
+ytick=seq(0,max(CRIT.vec),by=1000)
+axis(1,at=xtick,labels=T,cex.axis=1.5)
+axis(2,at=ytick,labels=T,cex.axis=1.5)
+box()
+
+lines(seq(1:length(xstart)),CRIT.vec,col="blue",lwd = 2)
+
+dev.off()
+
+#----------------------------------------------------
+setEPS()
+postscript("C:/UNI FILES/3files/2021/4-April/Matern1.5-2.5-newpar/Z-lucs-parametrization/distance-based/ZNpars.minKLPHI2/PhiKL/with-exchange-ultimate/threshold/length10-grid/criterionval.eps")
+
+plot(seq(1:length(xstart)),seq(0,max(CRIT.vec),length=length(xstart)),axes = F, type = "n",xlab="Iter",ylab="Criterion value",
+     main = bquote( paste("Criterion values for optimum designs",", ", sigma^2, ":",.(sigma2.ini)) ),
+     cex.main=2, cex.lab=1.5, cex.axis=1.5,pch=2,col="blue");
+
+xtick=c(seq(1,length(xstart),by = 10),length(xstart))
+ytick=seq(0,max(CRIT.vec),by=1000)
+axis(1,at=xtick,labels=T,cex.axis=1.5)
+axis(2,at=ytick,labels=T,cex.axis=1.5)
+box()
+
+lines(seq(1:length(xstart)),CRIT.vec,col="blue",lwd = 2)
+
+dev.off()
+###----------------------------------------------------------------------------------
+length(xstart)
+
+size.seg <- c(10,20,30,40,50,length(xstart))
+seg <- length(size.seg)
+
+jpeg("C:/UNI FILES/3files/2021/4-April/Matern1.5-2.5-newpar/Z-lucs-parametrization/distance-based/ZNpars.minKLPHI2/PhiKL/with-exchange-ultimate/threshold/length10-grid/verticaldesseg.jpeg")
+
+plot(c(5,(length(xstart)+5)),seq(0,10,length=2),axes = F, type = "n",xlab="iter",ylab="Design",
+     main = bquote( paste(sigma^2, ":",.(sigma2.ini)) ),cex.main=2, cex.lab=1.5, cex.axis=1.5,pch=2);
+
+
+xtick <- size.seg
+ytick=seq(0,10,by=1)
+axis(1,at=xtick,labels=T,cex.axis=1.5)
+axis(2,at=ytick,labels=T,cex.axis=1.5)
+box()
+abline(h=seq(0,10,length=21),col="gray")
+
+for(kk in 1:seg){
+  points(rep(size.seg[kk],size.seg[kk]),xstart[1:size.seg[kk]], type = "p",pch=16,col= "black");
+  #points(rep(size.seg[kk],n1),xstart[1:n1], type = "p",pch=16,col="blue");
+  
+}
+
+
+dev.off()
+#----------------------------
+setEPS()
+postscript("C:/UNI FILES/3files/2021/4-April/Matern1.5-2.5-newpar/Z-lucs-parametrization/distance-based/ZNpars.minKLPHI2/PhiKL/with-exchange-ultimate/threshold/length10-grid/verticaldesseg.eps")
+
+plot(c(5,(length(xstart)+5)),seq(0,10,length=2),axes = F, type = "n",xlab="iter",ylab="Design",
+     main = bquote( paste(sigma^2, ":",.(sigma2.ini)) ),cex.main=2, cex.lab=1.5, cex.axis=1.5,pch=2);
+
+
+xtick <- size.seg
+ytick=seq(0,10,by=1)
+axis(1,at=xtick,labels=T,cex.axis=1.5)
+axis(2,at=ytick,labels=T,cex.axis=1.5)
+box()
+abline(h=seq(0,10,length=21),col="gray")
+
+for(kk in 1:seg){
+  points(rep(size.seg[kk],size.seg[kk]),xstart[1:size.seg[kk]], type = "p",pch=16,col= "black");
+  #points(rep(size.seg[kk],n1),xstart[1:n1], type = "p",pch=16,col="blue");
+  
+}
+
+
+dev.off()
+

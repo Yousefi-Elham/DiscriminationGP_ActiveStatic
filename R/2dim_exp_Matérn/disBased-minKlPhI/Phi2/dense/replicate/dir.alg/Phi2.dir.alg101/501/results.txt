@@ -1,0 +1,235 @@
+design.opt[,c(1,2)]
+                
+      10.00 0.00
+       9.20 2.00
+       8.00 0.80
+x.hat  9.66 1.86
+x.hat  8.28 0.42
+x.hat  8.22 0.86
+x.hat  9.46 2.24
+x.hat 10.00 0.40
+x.hat  7.92 0.52
+x.hat  9.18 2.00
+x.hat  9.66 0.04
+x.hat  7.86 0.90
+x.hat  9.64 1.88
+x.hat 10.00 0.36
+x.hat  7.96 0.46
+x.hat  9.18 2.02
+x.hat  9.66 0.02
+x.hat  7.88 0.90
+x.hat  9.50 2.24
+x.hat  8.22 0.80
+x.hat  9.66 1.92
+x.hat  8.00 0.44
+x.hat  9.64 0.04
+x.hat  9.64 1.90
+x.hat  9.48 2.26
+x.hat  8.20 0.80
+x.hat  7.86 0.92
+x.hat  7.98 0.46
+x.hat  7.88 0.92
+x.hat  9.64 0.06
+x.hat  8.22 0.78
+x.hat  8.00 0.46
+x.hat  9.98 0.36
+x.hat  9.48 2.28
+x.hat  9.62 1.90
+x.hat  9.18 2.04
+> design.opt[,3]
+                                              x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat 
+0.0712620713 0.0013320013 0.0003330003 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 
+       x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat 
+0.0019980020 0.0009990010 0.0099900100 0.0019980020 0.0409590410 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 
+       x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat 
+0.1288711289 0.0159840160 0.0079920080 0.0019980020 0.1238761239 0.1218781219 0.0009990010 0.0009990010 0.0739260739 0.0039960040 0.1128871129 
+       x.hat        x.hat        x.hat 
+0.0629370629 0.1088911089 0.0919080919 
+> Phi.crit1 <- dir.deriv(est.theta,sigma2.ini,design.opt[,c(1,2)],design.opt[,3])
+> Phi.opt1 <-  Phi.optim(est.theta,sigma2.ini,design.opt[,c(1,2)],design.opt[,3]) #equal to CRIT.vec[max.iter] 
+> Phi.opt1
+[1] 0.0005851994
+> Phi.check <- numeric(N)
+> for(i in 1:N){
++   if(Phi.crit1[i] <= Phi.opt1){
++     Phi.check[i] <- 1
++   }else{
++     Phi.check[i] <- 0
++   }
++   
++ }
+> length(which(Phi.check==0))
+[1] 15
+> length(which(Phi.check==0))/N
+[1] 5.976072e-05
+> poi <- grid[!Phi.check, ]
+> poi
+      Var1 Var2
+11923 7.98 0.46
+11924 8.00 0.46
+12424 7.98 0.48
+19449 8.20 0.76
+19450 8.22 0.76
+19950 8.20 0.78
+19951 8.22 0.78
+20451 8.20 0.80
+23440 7.86 0.92
+23441 7.88 0.92
+48077 9.62 1.90
+48578 9.62 1.92
+48579 9.64 1.92
+57589 9.48 2.28
+57590 9.50 2.28
+
+
+
+x1 <- seq(0,10,length.out = 101)
+> x2 <- seq(0,10,length.out = 101)
+> grid <- expand.grid(x1,x2)
+> N <- nrow(grid)
+> N
+[1] 10201
+> design.opt[,c(1,2)]
+                
+      10.00 0.00
+       9.20 2.00
+       8.00 0.80
+x.hat  9.66 1.86
+x.hat  8.28 0.42
+x.hat  8.22 0.86
+x.hat  9.46 2.24
+x.hat 10.00 0.40
+x.hat  7.92 0.52
+x.hat  9.18 2.00
+x.hat  9.66 0.04
+x.hat  7.86 0.90
+x.hat  9.64 1.88
+x.hat 10.00 0.36
+x.hat  7.96 0.46
+x.hat  9.18 2.02
+x.hat  9.66 0.02
+x.hat  7.88 0.90
+x.hat  9.50 2.24
+x.hat  8.22 0.80
+x.hat  9.66 1.92
+x.hat  8.00 0.44
+x.hat  9.64 0.04
+x.hat  9.64 1.90
+x.hat  9.48 2.26
+x.hat  8.20 0.80
+x.hat  7.86 0.92
+x.hat  7.98 0.46
+x.hat  7.88 0.92
+x.hat  9.64 0.06
+x.hat  8.22 0.78
+x.hat  8.00 0.46
+x.hat  9.98 0.36
+x.hat  9.48 2.28
+x.hat  9.62 1.90
+x.hat  9.18 2.04
+> design.opt[,3]
+                                              x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat 
+0.0712620713 0.0013320013 0.0003330003 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 
+       x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat 
+0.0019980020 0.0009990010 0.0099900100 0.0019980020 0.0409590410 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 
+       x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat 
+0.1288711289 0.0159840160 0.0079920080 0.0019980020 0.1238761239 0.1218781219 0.0009990010 0.0009990010 0.0739260739 0.0039960040 0.1128871129 
+       x.hat        x.hat        x.hat 
+0.0629370629 0.1088911089 0.0919080919 
+> Phi.crit1 <- dir.deriv(est.theta,sigma2.ini,design.opt[,c(1,2)],design.opt[,3])
+> Phi.opt1 <-  Phi.optim(est.theta,sigma2.ini,design.opt[,c(1,2)],design.opt[,3]) #equal to CRIT.vec[max.iter] 
+> Phi.opt1
+[1] 0.0005851994
+> Phi.check <- numeric(N)
+> for(i in 1:N){
++   if(Phi.crit1[i] <= Phi.opt1){
++     Phi.check[i] <- 1
++   }else{
++     Phi.check[i] <- 0
++   }
++   
++ }
+> length(which(Phi.check==0))
+[1] 1
+> length(which(Phi.check==0))/N
+[1] 9.80296e-05
+> poi <- grid[!Phi.check, ]
+> poi
+    Var1 Var2
+891  8.2  0.8
+
+
+
+x2 <- seq(0,10,length.out = 51)
+> grid <- expand.grid(x1,x2)
+> N <- nrow(grid)
+> N
+[1] 2601
+> design.opt[,c(1,2)]
+                
+      10.00 0.00
+       9.20 2.00
+       8.00 0.80
+x.hat  9.66 1.86
+x.hat  8.28 0.42
+x.hat  8.22 0.86
+x.hat  9.46 2.24
+x.hat 10.00 0.40
+x.hat  7.92 0.52
+x.hat  9.18 2.00
+x.hat  9.66 0.04
+x.hat  7.86 0.90
+x.hat  9.64 1.88
+x.hat 10.00 0.36
+x.hat  7.96 0.46
+x.hat  9.18 2.02
+x.hat  9.66 0.02
+x.hat  7.88 0.90
+x.hat  9.50 2.24
+x.hat  8.22 0.80
+x.hat  9.66 1.92
+x.hat  8.00 0.44
+x.hat  9.64 0.04
+x.hat  9.64 1.90
+x.hat  9.48 2.26
+x.hat  8.20 0.80
+x.hat  7.86 0.92
+x.hat  7.98 0.46
+x.hat  7.88 0.92
+x.hat  9.64 0.06
+x.hat  8.22 0.78
+x.hat  8.00 0.46
+x.hat  9.98 0.36
+x.hat  9.48 2.28
+x.hat  9.62 1.90
+x.hat  9.18 2.04
+> design.opt[,3]
+                                              x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat 
+0.0712620713 0.0013320013 0.0003330003 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 
+       x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat 
+0.0019980020 0.0009990010 0.0099900100 0.0019980020 0.0409590410 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 0.0009990010 
+       x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat        x.hat 
+0.1288711289 0.0159840160 0.0079920080 0.0019980020 0.1238761239 0.1218781219 0.0009990010 0.0009990010 0.0739260739 0.0039960040 0.1128871129 
+       x.hat        x.hat        x.hat 
+0.0629370629 0.1088911089 0.0919080919 
+> Phi.crit1 <- dir.deriv(est.theta,sigma2.ini,design.opt[,c(1,2)],design.opt[,3])
+> Phi.opt1 <-  Phi.optim(est.theta,sigma2.ini,design.opt[,c(1,2)],design.opt[,3]) #equal to CRIT.vec[max.iter] 
+> Phi.opt1
+[1] 0.0005851994
+> Phi.check <- numeric(N)
+> for(i in 1:N){
++   if(Phi.crit1[i] <= Phi.opt1){
++     Phi.check[i] <- 1
++   }else{
++     Phi.check[i] <- 0
++   }
++   
++ }
+> length(which(Phi.check==0))
+[1] 1
+> length(which(Phi.check==0))/N
+[1] 0.0003844675
+> poi <- grid[!Phi.check, ]
+> poi
+    Var1 Var2
+246  8.2  0.8

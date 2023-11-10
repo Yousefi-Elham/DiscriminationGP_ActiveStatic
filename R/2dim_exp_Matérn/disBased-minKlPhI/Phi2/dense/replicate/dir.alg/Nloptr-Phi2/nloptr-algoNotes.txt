@@ -1,0 +1,47 @@
+9.502019 1.858492 0.3018613 0.3490694
+
+nloptr.print.options( opts.show = c("algorithm", "check_derivatives") )
+
+
+algorithm
+possible values: NLOPT_GN_DIRECT, NLOPT_GN_DIRECT_L,
+NLOPT_GN_DIRECT_L_RAND, NLOPT_GN_DIRECT_NOSCAL,
+NLOPT_GN_DIRECT_L_NOSCAL,
+NLOPT_GN_DIRECT_L_RAND_NOSCAL,
+NLOPT_GN_ORIG_DIRECT, NLOPT_GN_ORIG_DIRECT_L,
+NLOPT_GD_STOGO, NLOPT_GD_STOGO_RAND,
+NLOPT_LD_SLSQP, NLOPT_LD_LBFGS_NOCEDAL,
+NLOPT_LD_LBFGS, NLOPT_LN_PRAXIS, NLOPT_LD_VAR1,
+NLOPT_LD_VAR2, NLOPT_LD_TNEWTON,
+NLOPT_LD_TNEWTON_RESTART,
+NLOPT_LD_TNEWTON_PRECOND,
+NLOPT_LD_TNEWTON_PRECOND_RESTART,
+NLOPT_GN_CRS2_LM, NLOPT_GN_MLSL, NLOPT_GD_MLSL,
+NLOPT_GN_MLSL_LDS, NLOPT_GD_MLSL_LDS,
+NLOPT_LD_MMA, NLOPT_LD_CCSAQ, NLOPT_LN_COBYLA,
+NLOPT_LN_NEWUOA, NLOPT_LN_NEWUOA_BOUND,
+NLOPT_LN_NELDERMEAD, NLOPT_LN_SBPLX,
+NLOPT_LN_AUGLAG, NLOPT_LD_AUGLAG,
+NLOPT_LN_AUGLAG_EQ, NLOPT_LD_AUGLAG_EQ,
+NLOPT_LN_BOBYQA, NLOPT_GN_ISRES
+default value:   none
+
+This option is required. Check the NLopt website for a description of
+the algorithms.
+
+check_derivatives
+possible values: TRUE or FALSE
+default value:   FALSE
+
+The option check_derivatives can be activated to compare the
+user-supplied analytic gradients with finite difference
+approximations.
+
+
+# with equality constraints we have to choose one of the following algorithms: 
+#NLOPT_LD_AUGLAG, NLOPT_LN_AUGLAG, NLOPT_LD_AUGLAG_EQ, NLOPT_LN_AUGLAG_EQ, NLOPT_GN_ISRES, NLOPT_LD_SLSQP
+
+
+#all but NLOPT_GN_ISRES and NLOPT_LD_SLSQP require local optimizers
+
+# NLOPT_LD_SLSQP does not need local optimizer and works
