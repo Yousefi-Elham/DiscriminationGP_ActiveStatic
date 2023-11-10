@@ -1,6 +1,0 @@
-K01 <- kernel1+kernel2
-
-p1 <- -n/2*(1+log(2*pi)) -1/4*log(det(kernel1)) -1/4*log(det(kernel2))
-p2 <- -1/2*log( 1/2*dmvnorm(x=rep(0,n),sigma =2*kernel1)+1/2*dmvnorm(x=rep(0,n),sigma =K01) )
-p3 <- -1/2*log( 1/2*dmvnorm(x=rep(0,n),sigma =2*kernel2)+1/2*dmvnorm(x=rep(0,n),sigma =K01) )
-p1+p2+p3
