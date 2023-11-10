@@ -1,1 +1,0 @@
-Note : this optimization has been done for a three point desogn. We improved it further.. it is not three but a 9 point design according our last results July 5

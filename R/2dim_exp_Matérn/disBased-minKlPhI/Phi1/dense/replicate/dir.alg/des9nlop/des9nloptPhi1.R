@@ -1,5 +1,10 @@
 #Distance based
 
+#note that this design has been resulted from Phi2, nloptr.
+
+# we improve that using that design as tha starting point in nloptr for phi1
+
+
 library(mgcv)
 library(numDeriv)
 library(nloptr)

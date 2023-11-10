@@ -1,5 +1,9 @@
 #Distance based
 
+# Note : this optimization has been done for a three point design.
+# We improved it further. it is not three but a 9 point design according
+# our last results
+
 library(mgcv)
 library(numDeriv)
 library(nloptr)
